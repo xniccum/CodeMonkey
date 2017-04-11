@@ -1,37 +1,5 @@
 gneuron = require "neuron"
-util = require "util"
 local mod = {}
-
-function mod.generateNetwork(genome)
-    local network = {}
-    network.neurons = {}
-
-    for i=1,Inputs do
-        network.neurons[i] = gneuron.newNeuron()
-    end
-
-    for o=1,Outputs do
-        network.neurons[MaxNodes+o] = gneuron.newNeuron()
-    end
-
-    table.sort(genome.genes, function (a,b)
-        return (a.out < b.out)
-    end)
-    for i=1,#genome.genes do
-        local gene = genome.genes[i]
-        if gene.enabled then
-            if network.neurons[gene.out] == nil then
-                network.neurons[gene.out] = gneuron.newNeuron()
-            end
-            local neuron = network.neurons[gene.out]
-            table.insert(neuron.incoming, gene)
-            if network.neurons[gene.into] == nil then
-                network.neurons[gene.into] = gneuron.newNeuron()
-            end
-        end
-    end
-    genome.network = network
-end
 
 function mod.evaluateNetwork(network, inputs)
 	table.insert(inputs, 1)

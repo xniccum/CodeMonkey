@@ -1,3 +1,4 @@
+gspecies = require "species"
 local mod = {}
 
 function mod.newpop()
@@ -12,24 +13,24 @@ function mod.newpop()
     return pop
 end
 
-function mod.newInnovation(pop)
-	pop.innovation = pop.innovation + 1
-	return pop.innovation
+function mod.newInnovation()
+	pool.innovation = pool.innovation + 1
+	return pool.innovation
 end
 
-function mod.totalAverageFitness(pop)
+function mod.totalAverageFitness()
 	local total = 0
-	for s = 1,#pop.species do
-		local species = pop.species[s]
+	for s = 1,#poolp.species do
+		local species = pool.species[s]
 		total = total + species.averageFitness
 	end
 
 	return total
 end
 
-function mod.cullSpecies(cutToOne,pop)
-	for s = 1,#pop.species do
-		local species = pop.species[s]
+function mod.cullSpecies(cutToOne)
+	for s = 1,#pool.species do
+		local species = pool.species[s]
 
 		table.sort(species.genomes, function (a,b)
 			return (a.fitness > b.fitness)
@@ -45,11 +46,11 @@ function mod.cullSpecies(cutToOne,pop)
 	end
 end
 
-function mod.removeStaleSpecies(pop)
+function mod.removeStaleSpecies()
 	local survived = {}
 
-	for s = 1,#pop.species do
-		local species = pop.species[s]
+	for s = 1,#pool.species do
+		local species = pool.species[s]
 
 		table.sort(species.genomes, function (a,b)
 			return (a.fitness > b.fitness)
@@ -66,49 +67,54 @@ function mod.removeStaleSpecies(pop)
 		end
 	end
 
-	pop.species = survived
+	pool.species = survived
 end
 
 function mod.removeWeakSpecies(pop)
 	local survived = {}
 
 	local sum = totalAverageFitness()
-	for s = 1,#pop.species do
-		local species = pop.species[s]
+	for s = 1,#pool.species do
+		local species = pool.species[s]
 		breed = math.floor(species.averageFitness / sum * Population)
 		if breed >= 1 then
 			table.insert(survived, species)
 		end
 	end
 
-	pop.species = survived
+	pool.species = survived
 end
 
-function mod.addToSpecies(child,pop)
+function mod.addToSpecies(child)
 	local foundSpecies = false
 	for s=1,#pop.species do
-		local species = pop.species[s]
-		if not foundSpecies and sameSpecies(child, species.genomes[1]) then
+		local species = pool.species[s]
+		if not foundSpecies and gspecies.sameSpecies(child, species.genomes[1]) then
 			table.insert(species.genomes, child)
 			foundSpecies = true
 		end
 	end
 	if not foundSpecies then
-		local childSpecies = newSpecies()
+		local childSpecies = gspecies.newSpecies()
 		table.insert(childSpecies.genomes, child)
-		table.insert(pop.species, childSpecies)
+		table.insert(pool.species, childSpecies)
 	end
 end
 
-function mod.nextGenome(pop)
-	pop.currentGenome = pop.currentGenome + 1
-	if pop.currentGenome > #pop.species[pop.currentSpecies].genomes then
-		pop.currentGenome = 1
-		pop.currentSpecies = pop.currentSpecies+1
-		if pop.currentSpecies > #pop.species then
-			newGeneration()
-			pop.currentSpecies = 1
+function mod.rankGlobally()
+	local global = {}
+	for s = 1,#pool.species do
+		local species = pool.species[s]
+		for g = 1,#species.genomes do
+			table.insert(global, species.genomes[g])
 		end
+	end
+	table.sort(global, function (a,b)
+		return (a.fitness < b.fitness)
+	end)
+	
+	for g=1,#global do
+		global[g].globalRank = g
 	end
 end
 

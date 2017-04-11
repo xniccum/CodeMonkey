@@ -1,4 +1,4 @@
-ggenime = require "genome"
+ggenome = require "genome"
 local mod = {}
 
 function mod.newSpecies()
@@ -26,13 +26,13 @@ function mod.breedChild(species)
 	if math.random() < CrossoverChance then
 		g1 = species.genomes[math.random(1, #species.genomes)]
 		g2 = species.genomes[math.random(1, #species.genomes)]
-		child = ggenime.crossover(g1, g2)
+		child = ggenome.crossover(g1, g2)
 	else
 		g = species.genomes[math.random(1, #species.genomes)]
-		child = ggenime.copyGenome(g)
+		child = ggenome.copyGenome(g)
 	end
 
-	ggenime.mutate(child)
+	ggenome.mutate(child)
 	return child
 end
 

@@ -1,5 +1,5 @@
-local game = {}
-function game.getPositions()
+local mod = {}
+function mod.getPositions()
     if gameinfo.getromname() == "Super Mario World (USA)" then
         marioX = memory.read_s16_le(0x94)
         marioY = memory.read_s16_le(0x96)
@@ -18,7 +18,7 @@ function game.getPositions()
     end
 end
 
-function game.getTile(dx, dy)
+function mod.getTile(dx, dy)
     if gameinfo.getromname() == "Super Mario World (USA)" then
         x = math.floor((marioX+dx+8)/16)
         y = math.floor((marioY+dy)/16)
@@ -45,7 +45,7 @@ function game.getTile(dx, dy)
     end
 end
 
-function game.getSprites()
+function mod.getSprites()
     if gameinfo.getromname() == "Super Mario World (USA)" then
         local sprites = {}
         for slot=0,11 do
@@ -55,8 +55,8 @@ function game.getSprites()
                 spritey = memory.readbyte(0xD8+slot) + memory.readbyte(0x14D4+slot)*256
                 sprites[#sprites+1] = {["x"]=spritex, ["y"]=spritey}
             end
-        end     
-        
+        end
+
         return sprites
     elseif gameinfo.getromname() == "Super Mario Bros." then
         local sprites = {}
@@ -68,12 +68,12 @@ function game.getSprites()
                 sprites[#sprites+1] = {["x"]=ex,["y"]=ey}
             end
         end
-        
+
         return sprites
     end
 end
 
-function game.getExtendedSprites()
+function mod.getExtendedSprites()
     if gameinfo.getromname() == "Super Mario World (USA)" then
         local extended = {}
         for slot=0,11 do
@@ -90,23 +90,23 @@ function game.getExtendedSprites()
     end
 end
 
-function game.getInputs()
-    getPositions()
-    
-    sprites = getSprites()
-    extended = getExtendedSprites()
-    
+function mod.getInputs()
+    mod.getPositions()
+
+    sprites = mod.getSprites()
+    extended = mod.getExtendedSprites()
+
     local inputs = {}
-    
+
     for dy=-BoxRadius*16,BoxRadius*16,16 do
         for dx=-BoxRadius*16,BoxRadius*16,16 do
             inputs[#inputs+1] = 0
-            
-            tile = getTile(dx, dy)
+
+            tile = mod.getTile(dx, dy)
             if tile == 1 and marioY+dy < 0x1B0 then
                 inputs[#inputs] = 1
             end
-            
+
             for i = 1,#sprites do
                 distx = math.abs(sprites[i]["x"] - (marioX+dx))
                 disty = math.abs(sprites[i]["y"] - (marioY+dy))
@@ -127,4 +127,4 @@ function game.getInputs()
     return inputs
 end
 
-return game
+return mod
