@@ -3,6 +3,7 @@
 -- Intended for use with the BizHawk emulator and Super Mario World or Super Mario Bros. ROM.
 -- For SMW, make sure you have a save state named "DP1.state" at the beginning of a level,
 -- and put a copy in both the Lua folder and the root directory of BizHawk.
+game = require("game")
 
 if gameinfo.getromname() == "Super Mario World (USA)" then
 	Filename = "DP1.state"
@@ -55,97 +56,6 @@ TimeoutConstant = 20
 
 MaxNodes = 1000000
 
-function getPositions()
-	if gameinfo.getromname() == "Super Mario World (USA)" then
-		marioX = memory.read_s16_le(0x94)
-		marioY = memory.read_s16_le(0x96)
-		
-		local layer1x = memory.read_s16_le(0x1A);
-		local layer1y = memory.read_s16_le(0x1C);
-		
-		screenX = marioX-layer1x
-		screenY = marioY-layer1y
-	elseif gameinfo.getromname() == "Super Mario Bros." then
-		marioX = memory.readbyte(0x6D) * 0x100 + memory.readbyte(0x86)
-		marioY = memory.readbyte(0x03B8)+16
-	
-		screenX = memory.readbyte(0x03AD)
-		screenY = memory.readbyte(0x03B8)
-	end
-end
-
-function getTile(dx, dy)
-	if gameinfo.getromname() == "Super Mario World (USA)" then
-		x = math.floor((marioX+dx+8)/16)
-		y = math.floor((marioY+dy)/16)
-		
-		return memory.readbyte(0x1C800 + math.floor(x/0x10)*0x1B0 + y*0x10 + x%0x10)
-	elseif gameinfo.getromname() == "Super Mario Bros." then
-		local x = marioX + dx + 8
-		local y = marioY + dy - 16
-		local page = math.floor(x/256)%2
-
-		local subx = math.floor((x%256)/16)
-		local suby = math.floor((y - 32)/16)
-		local addr = 0x500 + page*13*16+suby*16+subx
-		
-		if suby >= 13 or suby < 0 then
-			return 0
-		end
-		
-		if memory.readbyte(addr) ~= 0 then
-			return 1
-		else
-			return 0
-		end
-	end
-end
-
-function getSprites()
-	if gameinfo.getromname() == "Super Mario World (USA)" then
-		local sprites = {}
-		for slot=0,11 do
-			local status = memory.readbyte(0x14C8+slot)
-			if status ~= 0 then
-				spritex = memory.readbyte(0xE4+slot) + memory.readbyte(0x14E0+slot)*256
-				spritey = memory.readbyte(0xD8+slot) + memory.readbyte(0x14D4+slot)*256
-				sprites[#sprites+1] = {["x"]=spritex, ["y"]=spritey}
-			end
-		end		
-		
-		return sprites
-	elseif gameinfo.getromname() == "Super Mario Bros." then
-		local sprites = {}
-		for slot=0,4 do
-			local enemy = memory.readbyte(0xF+slot)
-			if enemy ~= 0 then
-				local ex = memory.readbyte(0x6E + slot)*0x100 + memory.readbyte(0x87+slot)
-				local ey = memory.readbyte(0xCF + slot)+24
-				sprites[#sprites+1] = {["x"]=ex,["y"]=ey}
-			end
-		end
-		
-		return sprites
-	end
-end
-
-function getExtendedSprites()
-	if gameinfo.getromname() == "Super Mario World (USA)" then
-		local extended = {}
-		for slot=0,11 do
-			local number = memory.readbyte(0x170B+slot)
-			if number ~= 0 then
-				spritex = memory.readbyte(0x171F+slot) + memory.readbyte(0x1733+slot)*256
-				spritey = memory.readbyte(0x1715+slot) + memory.readbyte(0x1729+slot)*256
-				extended[#extended+1] = {["x"]=spritex, ["y"]=spritey}
-			end
-		end		
-		
-		return extended
-	elseif gameinfo.getromname() == "Super Mario Bros." then
-		return {}
-	end
-end
 
 function getInputs()
 	getPositions()
@@ -181,10 +91,6 @@ function getInputs()
 			end
 		end
 	end
-	
-	--mariovx = memory.read_s8(0x7B)
-	--mariovy = memory.read_s8(0x7D)
-	
 	return inputs
 end
 
@@ -195,105 +101,6 @@ end
 function newInnovation()
 	pool.innovation = pool.innovation + 1
 	return pool.innovation
-end
-
-function newPool()
-	local pool = {}
-	pool.species = {}
-	pool.generation = 0
-	pool.innovation = Outputs
-	pool.currentSpecies = 1
-	pool.currentGenome = 1
-	pool.currentFrame = 0
-	pool.maxFitness = 0
-	
-	return pool
-end
-
-function newSpecies()
-	local species = {}
-	species.topFitness = 0
-	species.staleness = 0
-	species.genomes = {}
-	species.averageFitness = 0
-	
-	return species
-end
-
-function newGenome()
-	local genome = {}
-	genome.genes = {}
-	genome.fitness = 0
-	genome.adjustedFitness = 0
-	genome.network = {}
-	genome.maxneuron = 0
-	genome.globalRank = 0
-	genome.mutationRates = {}
-	genome.mutationRates["connections"] = MutateConnectionsChance
-	genome.mutationRates["link"] = LinkMutationChance
-	genome.mutationRates["bias"] = BiasMutationChance
-	genome.mutationRates["node"] = NodeMutationChance
-	genome.mutationRates["enable"] = EnableMutationChance
-	genome.mutationRates["disable"] = DisableMutationChance
-	genome.mutationRates["step"] = StepSize
-	
-	return genome
-end
-
-function copyGenome(genome)
-	local genome2 = newGenome()
-	for g=1,#genome.genes do
-		table.insert(genome2.genes, copyGene(genome.genes[g]))
-	end
-	genome2.maxneuron = genome.maxneuron
-	genome2.mutationRates["connections"] = genome.mutationRates["connections"]
-	genome2.mutationRates["link"] = genome.mutationRates["link"]
-	genome2.mutationRates["bias"] = genome.mutationRates["bias"]
-	genome2.mutationRates["node"] = genome.mutationRates["node"]
-	genome2.mutationRates["enable"] = genome.mutationRates["enable"]
-	genome2.mutationRates["disable"] = genome.mutationRates["disable"]
-	
-	return genome2
-end
-
-function basicGenome()
-	local genome = newGenome()
-	local innovation = 1
-
-	genome.maxneuron = Inputs
-	mutate(genome)
-	
-	return genome
-end
-
-function newGene()
-	local gene = {}
-	gene.into = 0
-	gene.out = 0
-	gene.weight = 0.0
-	gene.enabled = true
-	gene.innovation = 0
-	
-	return gene
-end
-
-function copyGene(gene)
-	local gene2 = newGene()
-	gene2.into = gene.into
-	gene2.out = gene.out
-	gene2.weight = gene.weight
-	gene2.enabled = gene.enabled
-	gene2.innovation = gene.innovation
-	
-	return gene2
-end
-
-function newNeuron()
-	local neuron = {}
-	neuron.incoming = {}
-	neuron.value = 0.0
-	
-	return neuron
 end
 
 function generateNetwork(genome)
@@ -1083,19 +890,18 @@ function loadFile(filename)
 				else
 					gene.enabled = true
 				end
-				
 			end
 		end
 	end
         file:close()
-	
+
 	while fitnessAlreadyMeasured() do
 		nextGenome()
 	end
 	initializeRun()
 	pool.currentFrame = pool.currentFrame + 1
 end
- 
+
 function loadPool()
 	local filename = forms.gettext(saveLoadFile)
 	loadFile(filename)

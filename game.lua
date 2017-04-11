@@ -89,3 +89,5 @@ function game.getExtendedSprites()
         return {}
     end
 end
+
+return game
