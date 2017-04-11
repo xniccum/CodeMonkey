@@ -1,17 +1,16 @@
-local gene = {}
+local mod = {}
 
-function gene.newGene()
+function mod.newGene()
     local gene = {}
     gene.into = 0
     gene.out = 0
     gene.weight = 0.0
     gene.enabled = true
     gene.innovation = 0
-    
     return gene
 end
 
-function gene.copyGene(gene)
+function mod.copyGene(gene)
     local gene2 = newGene()
     gene2.into = gene.into
     gene2.out = gene.out
@@ -22,7 +21,7 @@ function gene.copyGene(gene)
     return gene2
 end
 
-function gene.containsLink(genes, link)
+function mod.containsLink(genes, link)
     for i=1,#genes do
         local gene = genes[i]
         if gene.into == link.into and gene.out == link.out then
@@ -31,7 +30,7 @@ function gene.containsLink(genes, link)
     end
 end
 
-function gene.disjoint(genes1, genes2)
+function mod.disjoint(genes1, genes2)
     local i1 = {}
     for i = 1,#genes1 do
         local gene = genes1[i]
@@ -64,7 +63,7 @@ function gene.disjoint(genes1, genes2)
     return disjointGenes / n
 end
 
-function gene.weights(genes1, genes2)
+function mod.weights(genes1, genes2)
     local i2 = {}
     for i = 1,#genes2 do
         local gene = genes2[i]
@@ -85,4 +84,4 @@ function gene.weights(genes1, genes2)
     return sum / coincident
 end
 
-return gene
+return mod

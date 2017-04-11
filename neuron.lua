@@ -1,14 +1,14 @@
-local neuron = {}
+gene = require "gene"
+local mod = {}
 
-function neuron.newNeuron()
+function mod.newNeuron()
     local neuron = {}
     neuron.incoming = {}
     neuron.value = 0.0
-
     return neuron
 end
 
-function neuron.randomNeuron(genes, nonInput)
+function mod.randomNeuron(genes, nonInput)
 	local neurons = {}
 	if not nonInput then
 		for i=1,Inputs do
@@ -43,4 +43,4 @@ function neuron.randomNeuron(genes, nonInput)
 	return 0
 end
 
-return neuron
+return mod
