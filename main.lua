@@ -12,6 +12,9 @@ gpool = require "pool"
 gspecies = require "species"
 util = require "util"
 
+console.writeline("SYSTEM ID: ")
+console.writeline(emu.getsystemid())
+
 if gameinfo.getromname() == "Super Mario World (USA)" then
 	Filename = "DP1.state"
 	ButtonNames = {
