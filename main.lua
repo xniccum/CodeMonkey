@@ -5,7 +5,11 @@
 -- and put a copy in both the Lua folder and the root directory of BizHawk.
 
 game = require "game"
+ggene = require "gene"
+ggenome = require "genome"
+gneuron = require "neuron"
 gpool = require "pool"
+gspecies = require "species"
 util = require "util"
 
 if gameinfo.getromname() == "Super Mario World (USA)" then
@@ -38,7 +42,7 @@ InputSize = (BoxRadius*2+1)*(BoxRadius*2+1)
 Inputs = InputSize+1
 Outputs = #ButtonNames
 
-Population = 300
+Population = 50
 DeltaDisjoint = 2.0
 DeltaWeights = 0.4
 DeltaThreshold = 1.0
@@ -59,8 +63,10 @@ TimeoutConstant = 20
 
 MaxNodes = 1000000
 
+pool = nil
+
 if pool == nil then
-	gpool.initializePool()
+	util.initializePool()
 end
 
 function displayGenome(genome)
@@ -224,9 +230,9 @@ form = forms.newform(200, 260, "Fitness")
 maxFitnessLabel = forms.label(form, "Max Fitness: " .. math.floor(pool.maxFitness), 5, 8)
 showNetwork = forms.checkbox(form, "Show Map", 5, 30)
 showMutationRates = forms.checkbox(form, "Show M-Rates", 5, 52)
-restartButton = forms.button(form, "Restart", initializePool, 5, 77)
-saveButton = forms.button(form, "Save", savePool, 5, 102)
-loadButton = forms.button(form, "Load", loadPool, 80, 102)
+restartButton = forms.button(form, "Restart", util.initializePool, 5, 77)
+saveButton = forms.button(form, "Save", util.savePool, 5, 102)
+loadButton = forms.button(form, "Load", util.loadPool, 80, 102)
 saveLoadFile = forms.textbox(form, Filename .. ".pool", 170, 25, nil, 5, 148)
 saveLoadLabel = forms.label(form, "Save/Load:", 5, 129)
 playTopButton = forms.button(form, "Play Top", playTop, 5, 170)

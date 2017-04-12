@@ -1,4 +1,3 @@
-ggenome = require "genome"
 local mod = {}
 
 function mod.newSpecies()
@@ -36,4 +35,4 @@ function mod.breedChild(species)
 	return child
 end
 
-return species
+return mod

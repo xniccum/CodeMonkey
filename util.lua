@@ -1,9 +1,3 @@
-gneuron = require "neuron"
-gpool = require "pool"
-ggenome = require "genome"
-game = require "game"
-gspecies = require "species"
-ggene = require "gene"
 local mod = {}
 
 function mod.clearJoypad()
@@ -14,12 +8,12 @@ function mod.clearJoypad()
 	joypad.set(controller)
 end
 
-function mod.savePool(saveLoadFile)
+function mod.savePool()
 	local filename = forms.gettext(saveLoadFile)
 	mod.writeFile(filename)
 end
 
-function mod.loadPool(saveLoadFile)
+function mod.loadPool()
 	local filename = forms.gettext(saveLoadFile)
 	mod.loadFile(filename)
 end
@@ -150,7 +144,7 @@ function mod.newGeneration()
 	gpool.rankGlobally()
 	gpool.removeStaleSpecies()
 	gpool.rankGlobally()
-	for s = 1,#pop.species do
+	for s = 1,#pool.species do
 		local species = pool.species[s]
 		gspecies.calculateAverageFitness(species)
 	end
@@ -173,7 +167,7 @@ function mod.newGeneration()
 		local child = children[c]
 		gpool.addToSpecies(child,pool)
 	end
-	pool.generation = pop.generation + 1
+	pool.generation = pool.generation + 1
 	mod.writeFile("backup." .. pool.generation .. "." .. forms.gettext(saveLoadFile))
 end
 
@@ -264,7 +258,7 @@ function mod.loadFile(filename)
     file:close()
 
 	while mod.fitnessAlreadyMeasured() do
-		ggenome.nextGenome()
+		mod.nextGenome()
 	end
 	mod.initializeRun()
 	pool.currentFrame = pool.currentFrame + 1

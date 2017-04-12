@@ -1,4 +1,3 @@
-gspecies = require "species"
 local mod = {}
 
 function mod.newpop()
@@ -62,7 +61,7 @@ function mod.removeStaleSpecies()
 		else
 			species.staleness = species.staleness + 1
 		end
-		if species.staleness < StaleSpecies or species.topFitness >= pop.maxFitness then
+		if species.staleness < StaleSpecies or species.topFitness >= pool.maxFitness then
 			table.insert(survived, species)
 		end
 	end
@@ -70,10 +69,10 @@ function mod.removeStaleSpecies()
 	pool.species = survived
 end
 
-function mod.removeWeakSpecies(pop)
+function mod.removeWeakSpecies()
 	local survived = {}
 
-	local sum = totalAverageFitness()
+	local sum = mod.totalAverageFitness()
 	for s = 1,#pool.species do
 		local species = pool.species[s]
 		breed = math.floor(species.averageFitness / sum * Population)
@@ -87,9 +86,9 @@ end
 
 function mod.addToSpecies(child)
 	local foundSpecies = false
-	for s=1,#pop.species do
+	for s=1,#pool.species do
 		local species = pool.species[s]
-		if not foundSpecies and gspecies.sameSpecies(child, species.genomes[1]) then
+		if not foundSpecies and ggenome.sameSpecies(child, species.genomes[1]) then
 			table.insert(species.genomes, child)
 			foundSpecies = true
 		end

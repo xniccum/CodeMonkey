@@ -11,7 +11,7 @@ function mod.newGene()
 end
 
 function mod.copyGene(gene)
-    local gene2 = newGene()
+    local gene2 = mod.newGene()
     gene2.into = gene.into
     gene2.out = gene.out
     gene2.weight = gene.weight

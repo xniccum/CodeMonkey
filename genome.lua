@@ -1,5 +1,3 @@
-ggene = require "gene"
-gneuron = require "neuron"
 local mod = {}
 
 function mod.newGenome()
@@ -22,9 +20,9 @@ function mod.newGenome()
 end
 
 function mod.copyGenome(genome)
-    local genome2 = newGenome()
+    local genome2 = mod.newGenome()
     for g=1,#genome.genes do
-        table.insert(genome2.genes, gene.copyGene(genome.genes[g]))
+        table.insert(genome2.genes, ggene.copyGene(genome.genes[g]))
     end
     genome2.maxneuron = genome.maxneuron
     genome2.mutationRates["connections"] = genome.mutationRates["connections"]
@@ -117,10 +115,10 @@ function mod.linkMutate(genome, forceBias)
         newLink.into = Inputs
     end
 
-    if containsLink(genome.genes, newLink) then
+    if ggene.containsLink(genome.genes, newLink) then
         return
     end
-    newLink.innovation = newInnovation()
+    newLink.innovation = gpool.newInnovation()
     newLink.weight = math.random()*4-2
     
     table.insert(genome.genes, newLink)
@@ -142,13 +140,13 @@ function mod.nodeMutate(genome,pop)
     local gene1 = ggene.copyGene(gene)
     gene1.out = genome.maxneuron
     gene1.weight = 1.0
-    gene1.innovation = pop.newInnovation()
+    gene1.innovation = gpool.newInnovation()
     gene1.enabled = true
     table.insert(genome.genes, gene1)
 
     local gene2 = ggene.copyGene(gene)
     gene2.into = genome.maxneuron
-    gene2.innovation = pop.newInnovation()
+    gene2.innovation = gpool.newInnovation()
     gene2.enabled = true
     table.insert(genome.genes, gene2)
 end
@@ -224,8 +222,8 @@ function mod.mutate(genome)
 end
 
 function mod.sameSpecies(genome1, genome2)
-    local dd = DeltaDisjoint*disjoint(genome1.genes, genome2.genes)
-    local dw = DeltaWeights*weights(genome1.genes, genome2.genes) 
+    local dd = DeltaDisjoint*ggene.disjoint(genome1.genes, genome2.genes)
+    local dw = DeltaWeights*ggene.weights(genome1.genes, genome2.genes) 
     return dd + dw < DeltaThreshold
 end
 
