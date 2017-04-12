@@ -3,6 +3,7 @@ gpool = require "pool"
 ggenome = require "genome"
 game = require "game"
 gspecies = require "species"
+ggene = require "gene"
 local mod = {}
 
 function mod.clearJoypad()
@@ -84,7 +85,7 @@ function mod.evaluateNetwork(network, inputs)
 		end
 
 		if #neuron.incoming > 0 then
-			neuron.value = util.sigmoid(sum)
+			neuron.value = mod.sigmoid(sum)
 		end
 	end
 
@@ -188,7 +189,7 @@ function mod.nextGenome()
 	end
 end
 
-function util.writeFile(filename)
+function mod.writeFile(filename)
     local file = io.open(filename, "w")
 	file:write(pool.generation .. "\n")
 	file:write(pool.maxFitness .. "\n")
@@ -223,7 +224,7 @@ function util.writeFile(filename)
         file:close()
 end
 
-function util.loadFile(filename)
+function mod.loadFile(filename)
     local file = io.open(filename, "r")
 	pool = gpool.newpop()
 	pool.generation = file:read("*number")
@@ -248,7 +249,7 @@ function util.loadFile(filename)
 			end
 			local numGenes = file:read("*number")
 			for n=1,numGenes do
-				local gene = newGene()
+				local gene = ggene.newGene()
 				table.insert(genome.genes, gene)
 				local enabled
 				gene.into, gene.out, gene.weight, gene.innovation, enabled = file:read("*number", "*number", "*number", "*number", "*number")
@@ -262,7 +263,7 @@ function util.loadFile(filename)
 	end
     file:close()
 
-	while fitnessAlreadyMeasured() do
+	while mod.fitnessAlreadyMeasured() do
 		ggenome.nextGenome()
 	end
 	mod.initializeRun()

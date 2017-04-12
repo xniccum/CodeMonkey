@@ -4,12 +4,9 @@
 -- For SMW, make sure you have a save state named "DP1.state" at the beginning of a level,
 -- and put a copy in both the Lua folder and the root directory of BizHawk.
 
-require("game")
-require("gene")
-require("genome")
-require("neuron")
-require("pool")
-require("species")
+game = require "game"
+gpool = require "pool"
+util = require "util"
 
 if gameinfo.getromname() == "Super Mario World (USA)" then
 	Filename = "DP1.state"
@@ -63,7 +60,7 @@ TimeoutConstant = 20
 MaxNodes = 1000000
 
 if pool == nil then
-	initializePool()
+	gpool.initializePool()
 end
 
 function displayGenome(genome)
@@ -172,7 +169,7 @@ function displayGenome(genome)
 				opacity = 0x20000000
 			end
 			
-			local color = 0x80-math.floor(math.abs(sigmoid(gene.weight))*0x80)
+			local color = 0x80-math.floor(math.abs(util.sigmoid(gene.weight))*0x80)
 			if gene.weight > 0 then 
 				color = opacity + 0x8000 + 0x10000*color
 			else
@@ -214,12 +211,12 @@ function playTop()
 	pool.currentGenome = maxg
 	pool.maxFitness = maxfitness
 	forms.settext(maxFitnessLabel, "Max Fitness: " .. math.floor(pool.maxFitness))
-	initializeRun()
+	util.initializeRun()
 	pool.currentFrame = pool.currentFrame + 1
 	return
 end
 
-writeFile("temp.pool")
+util.writeFile("temp.pool")
 
 event.onexit(onExit)
 
@@ -249,12 +246,12 @@ while true do
 	end
 	
 	if pool.currentFrame%5 == 0 then
-		evaluateCurrent()
+		util.evaluateCurrent()
 	end
 
 	joypad.set(controller)
 
-	getPositions()
+	game.getPositions()
 	if marioX > rightmost then
 		rightmost = marioX
 		timeout = TimeoutConstant
@@ -280,16 +277,16 @@ while true do
 		if fitness > pool.maxFitness then
 			pool.maxFitness = fitness
 			forms.settext(maxFitnessLabel, "Max Fitness: " .. math.floor(pool.maxFitness))
-			writeFile("backup." .. pool.generation .. "." .. forms.gettext(saveLoadFile))
+			util.writeFile("backup." .. pool.generation .. "." .. forms.gettext(saveLoadFile))
 		end
 		
 		console.writeline("Gen " .. pool.generation .. " species " .. pool.currentSpecies .. " genome " .. pool.currentGenome .. " fitness: " .. fitness)
 		pool.currentSpecies = 1
 		pool.currentGenome = 1
-		while fitnessAlreadyMeasured() do
-			nextGenome()
+		while util.fitnessAlreadyMeasured() do
+			util.nextGenome()
 		end
-		initializeRun()
+		util.initializeRun()
 	end
 
 	local measured = 0

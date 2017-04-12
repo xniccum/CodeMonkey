@@ -1,4 +1,3 @@
-gene = require "gene"
 local mod = {}
 
 function mod.newNeuron()

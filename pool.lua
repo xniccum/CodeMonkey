@@ -20,7 +20,7 @@ end
 
 function mod.totalAverageFitness()
 	local total = 0
-	for s = 1,#poolp.species do
+	for s = 1,#pool.species do
 		local species = pool.species[s]
 		total = total + species.averageFitness
 	end
