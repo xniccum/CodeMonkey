@@ -7,6 +7,7 @@
 -- WRAM, CHR, CIRAM (nametables), PRG ROM, PALRAM, OAM, System Bus, RAM
 
 local spriteHeight = 16
+vals = {}
 
 local function setDomain( newDomain )
     local previousDomain = memory.getcurrentmemorydomain()
@@ -36,13 +37,38 @@ local function visualizeSprite( index )
 end
 
 local function visualizeSprites()
-    local previousDomain = setDomain( "OAM" )
-    for i = 0, 10 do
-        visualizeSprite( 0 )
+    local previousDomain = setDomain( "WRAM" )
+    for i = 0, 127 do
+        visualizeSprite( i )
     end
 
     memory.usememorydomain( previousDomain )
 end
+
+local function initializeWRAM()
+    setDomain("WRAM")
+    local size = memory.getcurrentmemorydomainsize()
+    for i = 0, size-1, 2 do
+        val = memory.read_s16_le(i)
+        vals[i] = val
+    end
+end
+
+local function analyzeWRAM()
+    setDomain("WRAM")
+    local size = memory.getcurrentmemorydomainsize()
+    for i = 0, size-1, 2 do
+        val = memory.read_s16_le(i)
+        if vals[i] ~= nil then
+            if vals[i] > val and val > 0 then
+                vals[i] = val
+            else
+                vals[i] = nil
+            end
+        end
+    end
+end
+
 
 -- local guid2000 = event.onmemorywrite ( function()
 --     local previousDomain = setDomain( "System Bus" )
@@ -63,7 +89,21 @@ end
 
 print( "hardware-sprite-visualizer loaded" )
 
+initializeWRAM()
+counter = 1
 while true do
-    visualizeSprites()
+    -- console.write(".")
+    if counter % 2 == 0 then
+        analyzeWRAM()
+        file = io.open("mem2.txt", "a")
+        io.output(file)
+        for pos,val in pairs(vals) do
+            io.write("["..pos.."] => "..val.."\n")
+        end
+        io.write("----------------------------\n\n")
+        io.close(file)
+    end
+    counter = counter + 1
+    -- console.writeline(vals)
     emu.frameadvance()
 end

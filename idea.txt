@@ -1,0 +1,12 @@
+IDEA:
+
+Analyze all of WRAM for a value that consistently increases as the player moves right, advancing one frame at a time.
+
+
+MEMORY VALS:
+
+--- WRAM ---
+Player X: 0x0000BE
+Player Y: 0x0000C0
+
+Possible offset: 0x0000A6
